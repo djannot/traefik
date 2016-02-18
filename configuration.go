@@ -197,7 +197,7 @@ func LoadConfiguration() *GlobalConfiguration {
 	viper.AddConfigPath("$HOME/.traefik/") // call multiple times to add many search paths
 	viper.AddConfigPath(".")               // optionally look for config in the working directory
 	if err := viper.ReadInConfig(); err != nil {
-		fmtlog.Fatalf("Error reading file: %s", err)
+		fmtlog.Printf("Error reading file: %s", err)
 	}
 
 	if len(arguments.EntryPoints) > 0 {
