@@ -4,7 +4,7 @@ TRAEFIK_ENVS := \
 	-e OS_ARCH_ARG \
 	-e OS_PLATFORM_ARG \
 	-e TESTFLAGS \
-	-e CIRCLECI
+	-e TRAVIS
 
 
 SRCS = $(shell git ls-files '*.go' | grep -v '^external/')
@@ -18,7 +18,7 @@ REPONAME := $(shell echo $(REPO) | tr '[:upper:]' '[:lower:]')
 TRAEFIK_IMAGE := $(if $(REPONAME),$(REPONAME),"emilevauge/traefik")
 INTEGRATION_OPTS := $(if $(MAKE_DOCKER_HOST),-e "DOCKER_HOST=$(MAKE_DOCKER_HOST)", -v "/var/run/docker.sock:/var/run/docker.sock")
 
-DOCKER_RUN_TRAEFIK := docker run $(if $(CIRCLECI),,--rm) $(INTEGRATION_OPTS) -it $(TRAEFIK_ENVS) $(TRAEFIK_MOUNT) "$(TRAEFIK_DEV_IMAGE)"
+DOCKER_RUN_TRAEFIK := sudo docker run $(if $(TRAVIS),,--rm) $(INTEGRATION_OPTS) -it $(TRAEFIK_ENVS) $(TRAEFIK_MOUNT) "$(TRAEFIK_DEV_IMAGE)"
 
 print-%: ; @echo $*=$($*)
 
@@ -55,19 +55,19 @@ validate-golint: build
 	$(DOCKER_RUN_TRAEFIK) ./script/make.sh validate-golint
 
 build: dist
-	docker build -t "$(TRAEFIK_DEV_IMAGE)" -f build.Dockerfile .
+	sudo docker build -t "$(TRAEFIK_DEV_IMAGE)" -f build.Dockerfile .
 
 build-webui:
-	docker build -t traefik-webui -f webui/Dockerfile webui
+	sudo docker build -t traefik-webui -f webui/Dockerfile webui
 
 build-no-cache: dist
-	docker build --no-cache -t "$(TRAEFIK_DEV_IMAGE)" -f build.Dockerfile .
+	sudo docker build --no-cache -t "$(TRAEFIK_DEV_IMAGE)" -f build.Dockerfile .
 
 shell: build
 	$(DOCKER_RUN_TRAEFIK) /bin/bash
 
 image: build
-	docker build -t $(TRAEFIK_IMAGE) .
+	sudo docker build -t $(TRAEFIK_IMAGE) .
 
 dist:
 	mkdir dist
@@ -80,7 +80,7 @@ run-dev:
 generate-webui: build-webui
 	if [ ! -d "static" ]; then \
 		mkdir -p static; \
-		docker run --rm -v "$$PWD/static":'/src/static' traefik-webui gulp; \
+		sudo docker run --rm -v "$$PWD/static":'/src/static' traefik-webui gulp; \
 		echo 'For more informations show `webui/readme.md`' > $$PWD/static/DONT-EDIT-FILES-IN-THIS-DIRECTORY.md; \
 	fi
 

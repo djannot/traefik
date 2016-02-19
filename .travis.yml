@@ -1,0 +1,31 @@
+sudo: required
+
+language: go
+
+services:
+  - docker
+
+env:
+  REPO: $TRAVIS_REPO_SLUG
+  DOCKER_HOST: tcp://172.17.42.1:2375
+  MAKE_DOCKER_HOST: $DOCKER_HOST
+  VERSION: v1.0.alpha.$TRAVIS_BUILD_NUMBER
+
+install:
+  - go get github.com/tcnksm/ghr
+
+before_script:
+  - make validate
+  - make binary
+
+script:
+  - make test-unit
+  - make test-integration
+  - make crossbinary
+  - make image
+
+after_success:
+  provider: script
+  script: script/deploy.sh
+  on:
+    branch: master
