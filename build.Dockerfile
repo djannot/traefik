@@ -1,6 +1,6 @@
 FROM golang:1.6.0-alpine
 
-RUN apk update && apk add git bash gcc
+RUN apk update && apk add git bash gcc dev86
 
 RUN go get github.com/Masterminds/glide
 RUN go get github.com/mitchellh/gox
