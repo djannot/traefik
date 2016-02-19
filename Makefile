@@ -7,18 +7,18 @@ TRAEFIK_ENVS := \
 	-e TRAVIS
 
 
-SRCS = $(git ls-files '*.go' | grep -v '^external/')
+SRCS = $(shell git ls-files '*.go' | grep -v '^external/')
 
 BIND_DIR := "dist"
 TRAEFIK_MOUNT := -v "$(CURDIR)/$(BIND_DIR):/go/src/github.com/emilevauge/traefik/$(BIND_DIR)"
 
-GIT_BRANCH := $(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
 TRAEFIK_DEV_IMAGE := traefik-dev$(if $(GIT_BRANCH),:$(GIT_BRANCH))
-REPONAME := $(echo $(REPO) | tr '[:upper:]' '[:lower:]')
+REPONAME := $(shell echo $(REPO) | tr '[:upper:]' '[:lower:]')
 TRAEFIK_IMAGE := $(if $(REPONAME),$(REPONAME),"emilevauge/traefik")
 INTEGRATION_OPTS := $(if $(MAKE_DOCKER_HOST),-e "DOCKER_HOST=$(MAKE_DOCKER_HOST)", -v "/var/run/docker.sock:/var/run/docker.sock")
 
-DOCKER_RUN_TRAEFIK := sudo docker run $(if $(TRAVIS),,--rm) $(INTEGRATION_OPTS) -it $(TRAEFIK_ENVS) $(TRAEFIK_MOUNT) "$(TRAEFIK_DEV_IMAGE)"
+DOCKER_RUN_TRAEFIK := docker run $(if $(TRAVIS),,--rm) $(INTEGRATION_OPTS) -it $(TRAEFIK_ENVS) $(TRAEFIK_MOUNT) "$(TRAEFIK_DEV_IMAGE)"
 
 print-%: ; @echo $*=$($*)
 
@@ -55,19 +55,19 @@ validate-golint: build
 	$(DOCKER_RUN_TRAEFIK) ./script/make.sh validate-golint
 
 build: dist
-	sudo docker build -t "$(TRAEFIK_DEV_IMAGE)" -f build.Dockerfile .
+	docker build -t "$(TRAEFIK_DEV_IMAGE)" -f build.Dockerfile .
 
 build-webui:
-	sudo docker build -t traefik-webui -f webui/Dockerfile webui
+	docker build -t traefik-webui -f webui/Dockerfile webui
 
 build-no-cache: dist
-	sudo docker build --no-cache -t "$(TRAEFIK_DEV_IMAGE)" -f build.Dockerfile .
+	docker build --no-cache -t "$(TRAEFIK_DEV_IMAGE)" -f build.Dockerfile .
 
 shell: build
 	$(DOCKER_RUN_TRAEFIK) /bin/bash
 
 image: build
-	sudo docker build -t $(TRAEFIK_IMAGE) .
+	docker build -t $(TRAEFIK_IMAGE) .
 
 dist:
 	mkdir dist
@@ -80,7 +80,7 @@ run-dev:
 generate-webui: build-webui
 	if [ ! -d "static" ]; then \
 		mkdir -p static; \
-		sudo docker run --rm -v "$$PWD/static":'/src/static' traefik-webui gulp; \
+		docker run --rm -v "$$PWD/static":'/src/static' traefik-webui gulp; \
 		echo 'For more informations show `webui/readme.md`' > $$PWD/static/DONT-EDIT-FILES-IN-THIS-DIRECTORY.md; \
 	fi
 
