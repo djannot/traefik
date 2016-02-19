@@ -3,8 +3,7 @@
 TRAEFIK_ENVS := \
 	-e OS_ARCH_ARG \
 	-e OS_PLATFORM_ARG \
-	-e TESTFLAGS \
-	-e TRAVIS
+	-e TESTFLAGS
 
 
 SRCS = $(shell git ls-files '*.go' | grep -v '^external/')
