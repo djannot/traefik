@@ -4,7 +4,6 @@ RUN apk update && apk add git bash
 
 RUN go get github.com/Masterminds/glide
 RUN go get github.com/mitchellh/gox
-RUN go get github.com/tcnksm/ghr
 RUN go get github.com/jteeuwen/go-bindata/...
 RUN go get github.com/golang/lint/golint
 

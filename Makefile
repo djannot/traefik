@@ -7,14 +7,14 @@ TRAEFIK_ENVS := \
 	-e TRAVIS
 
 
-SRCS = $(shell git ls-files '*.go' | grep -v '^external/')
+SRCS = $(git ls-files '*.go' | grep -v '^external/')
 
 BIND_DIR := "dist"
 TRAEFIK_MOUNT := -v "$(CURDIR)/$(BIND_DIR):/go/src/github.com/emilevauge/traefik/$(BIND_DIR)"
 
-GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
+GIT_BRANCH := $(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 TRAEFIK_DEV_IMAGE := traefik-dev$(if $(GIT_BRANCH),:$(GIT_BRANCH))
-REPONAME := $(shell echo $(REPO) | tr '[:upper:]' '[:lower:]')
+REPONAME := $(echo $(REPO) | tr '[:upper:]' '[:lower:]')
 TRAEFIK_IMAGE := $(if $(REPONAME),$(REPONAME),"emilevauge/traefik")
 INTEGRATION_OPTS := $(if $(MAKE_DOCKER_HOST),-e "DOCKER_HOST=$(MAKE_DOCKER_HOST)", -v "/var/run/docker.sock:/var/run/docker.sock")
 
